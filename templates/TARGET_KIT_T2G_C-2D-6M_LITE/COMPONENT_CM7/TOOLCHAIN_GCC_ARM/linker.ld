@@ -1,5 +1,5 @@
 /***************************************************************************//**
-* \file xmc7200d_x8384_cm7.ld
+* \file tviic_x6336_cm7.ld
 * \version 1.0.0
 *
 * Linker file for the GNU C compiler.
@@ -19,7 +19,7 @@
 *
 ********************************************************************************
 * \copyright
-* Copyright 2021 Cypress Semiconductor Corporation
+* Copyright 2024 Cypress Semiconductor Corporation
 * SPDX-License-Identifier: Apache-2.0
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
@@ -47,17 +47,17 @@ RAMVECTORS_ALIGNMENT                = 128;
 
 sram_start_reserve                  = 0;
 
-sram_total_size                     = 0x00100000; /* SRAM0 + SRAM1 */
+sram_total_size                     = 0x000A0000; /* SRAM0 + SRAM1 + SRAM2 */
 sram_private_for_srom               = 0x00000800; /* Private SRAM for SROM (e.g. API processing) */
 sram_shared                         = 0x00000100;
 sram_used_by_boot                   = 0x0; /* Used during boot by Cypress firmware (content will be overwritten on reset, so it should not be used for loadable sections in case of RAM build configurations) */
 
-cm0plus_sram_reserve                = 0x00020000; /* cm0 sram size */
-cm7_0_sram_reserve                  = 0x00060000; /* cm7_0 sram size */
+cm0plus_sram_reserve                = 0x00004000; /* 16K : cm0 sram size */
+cm7_0_sram_reserve                  = 0x0009C000; /* 624K: cm7_0 sram size */
 
-code_flash_total_size               = 0x00830000;
-cm0plus_code_flash_reserve          = 0x00080000;
-cm7_0_code_flash_reserve            = 0x00200000;
+code_flash_total_size               = 0x00630000; /* 6336K: total flash size */
+cm0plus_code_flash_reserve          = 0x00080000; /* 512K : cm0 flash size */
+cm7_0_code_flash_reserve            = 0x005B0000; /* 5824K: cm7_0 flash size */
 
 code_flash_base_address             = 0x10000000;
 sram_base_address                   = 0x28000000;
@@ -67,35 +67,25 @@ _base_SRAM_shared                   = sram_base_address + sram_start_reserve + s
 _size_SRAM_shared                   = sram_shared;
 _base_SRAM_CM7_0                    = sram_base_address + cm0plus_sram_reserve;
 _size_SRAM_CM7_0                    = cm7_0_sram_reserve;
-/* In case of single CM7 device CM7_1 values should not be used */
-_base_SRAM_CM7_1                    = sram_base_address + cm0plus_sram_reserve + cm7_0_sram_reserve;
-_size_SRAM_CM7_1                    = sram_total_size - cm0plus_sram_reserve - cm7_0_sram_reserve;
 
 /* Code flash reservations */
 _base_CODE_FLASH_CM0P               = code_flash_base_address;
 _size_CODE_FLASH_CM0P               = cm0plus_code_flash_reserve;
 _base_CODE_FLASH_CM7_0              = code_flash_base_address + cm0plus_code_flash_reserve;
 _size_CODE_FLASH_CM7_0              = cm7_0_code_flash_reserve;
-_base_CODE_FLASH_CM7_1              = code_flash_base_address + cm0plus_code_flash_reserve + cm7_0_code_flash_reserve;
-_size_CODE_FLASH_CM7_1              = code_flash_total_size - cm0plus_code_flash_reserve - cm7_0_code_flash_reserve;
 
 /* Fixed Addresses */
 _base_WORK_FLASH                    = 0x14000000;
-_size_WORK_FLASH                    = 0x00040000;   /* 256K Work flash */
-_base_CM7_0_ITCM                    = 0xA0000000;
-_size_CM7_0_ITCM                    = 0x00004000;
-_base_CM7_0_DTCM                    = 0xA0010000;
-_size_CM7_0_DTCM                    = 0x00004000;
-_base_CM7_1_ITCM                    = 0xA0100000;
-_size_CM7_1_ITCM                    = 0x00004000;
-_base_CM7_1_DTCM                    = 0xA0110000;
-_size_CM7_1_DTCM                    = 0x00004000;
+_size_WORK_FLASH                    = 0x00020000;   /* 128K Work flash */
+_base_CM7_0_ITCM                    = 0x00000000;
+_size_CM7_0_ITCM                    = 0x00010000;
+_base_CM7_0_DTCM                    = 0x20000000;
+_size_CM7_0_DTCM                    = 0x00010000;
 
-/* For the non-dual cm7 device, _CORE_CM7_0_ should be defined and _CORE_CM7_1_ should not be defined */
-_base_SRAM                          = DEFINED(_CORE_CM7_1_) ? _base_SRAM_CM7_1 : DEFINED(_CORE_CM7_0_) ? _base_SRAM_CM7_0 : ASSERT(1<1, "Error: Either_CORE_CM7_0_ or _CORE_CM7_1_ not defined");
-_size_SRAM                          = DEFINED(_CORE_CM7_1_) ? _size_SRAM_CM7_1 : DEFINED(_CORE_CM7_0_) ? _size_SRAM_CM7_0 : ASSERT(1<1, "Error: Either_CORE_CM7_0_ or _CORE_CM7_1_ not defined");
-_base_CODE_FLASH                    = DEFINED(_CORE_CM7_1_) ? _base_CODE_FLASH_CM7_1 : DEFINED(_CORE_CM7_0_) ? _base_CODE_FLASH_CM7_0  : ASSERT(1<1, "Error: Either_CORE_CM7_0_ or _CORE_CM7_1_ not defined");
-_size_CODE_FLASH                    = DEFINED(_CORE_CM7_1_) ? _size_CODE_FLASH_CM7_1 : DEFINED(_CORE_CM7_0_) ? _size_CODE_FLASH_CM7_0  : ASSERT(1<1, "Error: Either_CORE_CM7_0_ or _CORE_CM7_1_ not defined");
+_base_SRAM                          = _base_SRAM_CM7_0;
+_size_SRAM                          = _size_SRAM_CM7_0;
+_base_CODE_FLASH                    = _base_CODE_FLASH_CM7_0;
+_size_CODE_FLASH                    = _size_CODE_FLASH_CM7_0;
 _base_SFLASH_USER_DATA              = 0x17000800;
 _size_SFLASH_USER_DATA              = 0x00000800;
 _base_SFLASH_NAR                    = 0x17001A00;
@@ -107,13 +97,13 @@ _size_SFLASH_APP_PROT               = 0x00000200;
 _base_SFLASH_TOC2                   = 0x17007C00;
 _size_SFLASH_TOC2                   = 0x00000200;
 _base_XIP                           = 0x60000000;
-_size_XIP                           = 0x08000000;
+_size_XIP                           = 0x40000000;
 _base_EFUSE                         = 0x90700000;
 _size_EFUSE                         = 0x00100000;
-_base_ITCM                          = DEFINED(_CORE_CM7_1_) ? _base_CM7_1_ITCM : DEFINED(_CORE_CM7_0_) ? _base_CM7_0_ITCM  : ASSERT(1<1, "Error: Either_CORE_CM7_0_ or _CORE_CM7_1_ not defined");
-_size_ITCM                          = DEFINED(_CORE_CM7_1_) ? _size_CM7_1_ITCM : DEFINED(_CORE_CM7_0_) ? _size_CM7_0_ITCM  : ASSERT(1<1, "Error: Either_CORE_CM7_0_ or _CORE_CM7_1_ not defined");
-_base_DTCM                          = DEFINED(_CORE_CM7_1_) ? _base_CM7_1_DTCM : DEFINED(_CORE_CM7_0_) ? _base_CM7_0_DTCM  : ASSERT(1<1, "Error: Either_CORE_CM7_0_ or _CORE_CM7_1_ not defined");
-_size_DTCM                          = DEFINED(_CORE_CM7_1_) ? _size_CM7_1_DTCM : DEFINED(_CORE_CM7_0_) ? _size_CM7_0_DTCM  : ASSERT(1<1, "Error: Either_CORE_CM7_0_ or _CORE_CM7_1_ not defined");
+_base_ITCM                          = _base_CM7_0_ITCM;
+_size_ITCM                          = _size_CM7_0_ITCM;
+_base_DTCM                          = _base_CM7_0_DTCM;
+_size_DTCM                          = _size_CM7_0_DTCM;
 
 
 /* Force symbol to be entered in the output file as an undefined symbol. Doing
@@ -129,7 +119,7 @@ EXTERN(Reset_Handler)
 */
 MEMORY
 {
-    /* The ram and flash regions control RAM and flash memory allocation for the CM7_0/CM7_1 core. */
+    /* The ram and flash regions control RAM and flash memory allocation for the CM7_0 core. */
     shared_ram          (rxw)       : ORIGIN = _base_SRAM_shared,           LENGTH = _size_SRAM_shared
     ram                 (rxw)       : ORIGIN = _base_SRAM,                  LENGTH = _size_SRAM                 /* SRAM */
     flash_cm0p          (rx)        : ORIGIN = _base_CODE_FLASH_CM0P,       LENGTH = _size_CODE_FLASH_CM0P      /* CODE flash CM0+ */
@@ -146,7 +136,7 @@ MEMORY
     sflash_public_key   (rx)        : ORIGIN = _base_SFLASH_PUB_KEY,        LENGTH = _size_SFLASH_PUB_KEY       /* Supervisory flash: Public Key */
     sflash_app_prot     (rx)        : ORIGIN = _base_SFLASH_APP_PROT,       LENGTH = _size_SFLASH_APP_PROT
     sflash_toc_2        (rx)        : ORIGIN = _base_SFLASH_TOC2,           LENGTH = _size_SFLASH_TOC2          /* Supervisory flash: Table of Content # 2 */
-    xip                 (rx)        : ORIGIN = _base_XIP,                   LENGTH = _size_XIP                  /* XIP: 128 MB */
+    xip                 (rx)        : ORIGIN = _base_XIP,                   LENGTH = _size_XIP                  /* XIP: 1GB */
     efuse               (rx)        : ORIGIN = _base_EFUSE,                 LENGTH = _size_EFUSE                /* 1MB */
     itcm                (rx)        : ORIGIN = _base_ITCM,                  LENGTH = _size_ITCM                 /* ITCM */
     dtcm                (rx)        : ORIGIN = _base_DTCM,                  LENGTH = _base_DTCM                 /* DTCM */
@@ -207,7 +197,6 @@ SECTIONS
         KEEP(*(.eh_frame*))
     } > flash
 
-
     .ARM.extab :
     {
         *(.ARM.extab* .gnu.linkonce.armextab.*)
@@ -231,6 +220,16 @@ SECTIONS
         LONG (__data_start__)                               /* To   */
         LONG ((__data_end__ - __data_start__)/4)            /* Size */
 
+        /* Copy code to ITCM */
+        LONG (__zero_table_end__)                           /* From */
+        LONG (__itcm_start__)                                     /* To   */
+        LONG ((__itcm_end__ - __itcm_start__)/4)  /* Size */
+
+        /* Copy data to DTCM */
+        LONG (__itcm_flash_end__)                            /* From */
+        LONG (__dtcm_start__)                                      /* To   */
+        LONG ((__dtcm_end__ - __dtcm_start__)/4)   /* Size */
+
         __copy_table_end__ = .;
     } > flash
 
@@ -243,6 +242,25 @@ SECTIONS
         LONG ((__bss_end__ - __bss_start__)/4)
         __zero_table_end__ = .;
     } > flash
+
+
+    /* itcm */
+    .cy_itcm ORIGIN(itcm):
+    {
+        __itcm_start__ = .;
+        KEEP(*(.cy_itcm))
+        __itcm_end__ = .;
+    } > itcm AT>flash
+
+    __itcm_flash_end__ = __zero_table_end__ + (__itcm_end__ - __itcm_start__);
+
+    /* dtcm */
+    .cy_dtcm ORIGIN(dtcm):
+    {
+        __dtcm_start__ = .;
+        KEEP(*(.cy_dtcm))
+        __dtcm_end__ = .;
+    } > dtcm AT>flash
 
     __etext =  . ;
 
@@ -416,18 +434,6 @@ SECTIONS
     {
         KEEP(*(.cy_efuse))
     } > efuse
-
-    /* itcm */
-    .cy_itcm :
-    {
-        KEEP(*(.cy_itcm))
-    } > itcm
-
-    /* dtcm */
-    .cy_dtcm :
-    {
-        KEEP(*(.cy_dtcm))
-    } > dtcm
 }
 
 

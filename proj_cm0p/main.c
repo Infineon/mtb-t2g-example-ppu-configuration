@@ -1,6 +1,6 @@
 /**********************************************************************************************************************
  * \file main.c
- * \copyright Copyright (C) Infineon Technologies AG 2019
+ * \copyright Copyright (C) Infineon Technologies AG 2024
  *
  * Use of this file is subject to the terms of use agreed between (i) you or the company in which ordinary course of
  * business you are acting and (ii) Infineon Technologies AG or its licensees. If and as long as no such terms of use
@@ -27,7 +27,7 @@
 /*********************************************************************************************************************/
 /*-----------------------------------------------------Includes------------------------------------------------------*/
 /*********************************************************************************************************************/
-#include "cyhal.h"
+#include "cy_pdl.h"
 #include "cybsp.h"
 #include "cy_prot.h"
 #include "cy_sysfault.h"
@@ -38,8 +38,12 @@
 /*------------------------------------------------------Macros-------------------------------------------------------*/
 /*********************************************************************************************************************/
 /* Fault number for CM7_1 Peripheral Master Interface PPU violation */
+#if defined(COMPONENT_CAT1C8M)
 #define PERI_MS_VIO_2   30
-
+#endif
+#if defined(COMPONENT_TVIIC2D6M)
+#define PERI_MS_VIO_2   28
+#endif
 /*********************************************************************************************************************/
 /*-------------------------------------------------Global variables--------------------------------------------------*/
 /*********************************************************************************************************************/
@@ -103,10 +107,9 @@ int main(void)
     __enable_irq();
 
     /* Initialize retarget-io to use the debug UART port */
-    if (cy_retarget_io_init(CYBSP_DEBUG_UART_TX, CYBSP_DEBUG_UART_RX, CY_RETARGET_IO_BAUDRATE) != CY_RSLT_SUCCESS)
-    {
-        CY_ASSERT(0);
-    }
+    Cy_SCB_UART_Init(UART_HW, &UART_config, NULL);
+    Cy_SCB_UART_Enable(UART_HW);
+    cy_retarget_io_init(UART_HW);
 
     /* Initialize shared variable */
     g_shared[0] = IDLE;
@@ -154,21 +157,19 @@ int main(void)
         if (g_shared[0] == IDLE)
         {
             /* Check if '1' key or '2' key was pressed */
-            if (cyhal_uart_getc(&cy_retarget_io_uart_obj, &uartReadValue, 1) == CY_RSLT_SUCCESS)
+            uartReadValue = Cy_SCB_UART_Get(UART_HW);
+            if (uartReadValue == '1')
             {
-                if (uartReadValue == '1')
-                {
-                    /* Ask CM7_0 to read access GPIO_ENH Port #0 */
-                    printf("Read access from CM7_0 requested\r\n");
-                    g_shared[0] = FROM_CM0_CM7_0_READ_GPIO_ENH_0;
+                /* Ask CM7_0 to read access GPIO_ENH Port #0 */
+                printf("Read access from CM7_0 requested\r\n");
+                g_shared[0] = FROM_CM0_CM7_0_READ_GPIO_ENH_0;
 
-                }
-                if (uartReadValue == '2')
-                {
-                    /* Ask CM7_1 to read access GPIO_ENH Port #0 */
-                    printf("Read access from CM7_1 requested\r\n");
-                    g_shared[0] = FROM_CM0_CM7_1_READ_GPIO_ENH_0;
-                }
+            }
+            if (uartReadValue == '2')
+            {
+                /* Ask CM7_1 to read access GPIO_ENH Port #0 */
+                printf("Read access from CM7_1 requested\r\n");
+                g_shared[0] = FROM_CM0_CM7_1_READ_GPIO_ENH_0;
             }
         }
 
@@ -191,7 +192,7 @@ int main(void)
                 exceptionHalt = true;
             }
         }
-        cyhal_system_delay_ms(SLEEP_TIME_MS);
+        Cy_SysLib_Delay(SLEEP_TIME_MS);
     }
 }
 

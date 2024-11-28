@@ -1,6 +1,6 @@
 /**********************************************************************************************************************
  * \file main.c
- * \copyright Copyright (C) Infineon Technologies AG 2019
+ * \copyright Copyright (C) Infineon Technologies AG 2024
  *
  * Use of this file is subject to the terms of use agreed between (i) you or the company in which ordinary course of
  * business you are acting and (ii) Infineon Technologies AG or its licensees. If and as long as no such terms of use
@@ -27,7 +27,7 @@
 /*********************************************************************************************************************/
 /*-----------------------------------------------------Includes------------------------------------------------------*/
 /*********************************************************************************************************************/
-#include "cyhal.h"
+#include "cy_pdl.h"
 #include "cybsp.h"
 #include "cy_gpio.h"
 #include "shared.h"
@@ -47,8 +47,21 @@
  */
 int main(void)
 {
+    cy_rslt_t result;
+
+    /* Initialize the device and board peripherals */
+    result = cybsp_init() ;
+    if (result != CY_RSLT_SUCCESS)
+    {
+        CY_ASSERT(0);
+    }
+
     /* Enable global interrupts */
     __enable_irq();
+
+    /* Disable Cache */
+     SCB_DisableICache();
+     SCB_DisableDCache();
 
     for (;;)
     {
@@ -59,7 +72,7 @@ int main(void)
             g_shared[1] = Cy_GPIO_Read(GPIO_PRT0, 0);
             g_shared[0] = FROM_CM7_PENDING_ANSWER;
         }
-        cyhal_system_delay_ms(SLEEP_TIME_MS);
+        Cy_SysLib_Delay(SLEEP_TIME_MS);
     }
 }
 

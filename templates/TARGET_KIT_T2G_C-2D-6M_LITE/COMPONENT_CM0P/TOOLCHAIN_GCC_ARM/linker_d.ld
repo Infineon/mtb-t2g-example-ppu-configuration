@@ -1,5 +1,5 @@
 /***************************************************************************//**
-* \file xmc7200d_x8384_cm0plus.ld
+* \file tviic_x6336_cm0plus.ld
 * \version 1.0.0
 *
 * Linker file for the GNU C compiler.
@@ -19,7 +19,7 @@
 *
 ********************************************************************************
 * \copyright
-* Copyright 2021 Cypress Semiconductor Corporation
+* Copyright 2021-2024 Cypress Semiconductor Corporation
 * SPDX-License-Identifier: Apache-2.0
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,7 +41,7 @@ SEARCH_DIR(.)
 GROUP(libgcc.a libc.a libm.a libnosys.a)
 ENTRY(Reset_Handler)
 
-/* The size of the stack section at the end of CM4 SRAM */
+/* The size of the stack section at the end of CM7_1 SRAM */
 STACK_SIZE = 0x1000;
 RAMVECTORS_ALIGNMENT                = 128;
 
@@ -49,13 +49,11 @@ sram_start_reserve                  = 0;
 sram_private_for_srom               = 0x00000800; /* Private SRAM for SROM (e.g. API processing). Reserved at the beginning */
 sram_shared                         = 0x00000100;
 
-cm0plus_sram_reserve                = 0x00020000; /* cm0 sram size */
-cm0plus_code_flash_reserve          = 0x00080000; /* cm7_0 sram size */
-cm7_0_code_flash_reserve            = 0x00200000;
+cm0plus_sram_reserve                = 0x00004000; /* 16K : cm0 sram size */
+cm0plus_code_flash_reserve          = 0x00080000; /* 512K: cm0 flash size */
 
 sram_base_address                   = 0x28000000;
 code_flash_base_address             = 0x10000000;
-code_flash_total_size               = 0x00080000;
 
 _base_SRAM_shared                   = sram_base_address + sram_start_reserve + sram_private_for_srom;
 _size_SRAM_shared                   = sram_shared;
@@ -66,7 +64,7 @@ _size_CODE_FLASH_CM0P               = cm0plus_code_flash_reserve;
 
 /* Fixed Addesses */
 _base_WORK_FLASH                    = 0x14000000;
-_size_WORK_FLASH                    = 0x00040000;   /* 256K Work flash */
+_size_WORK_FLASH                    = 0x00020000;   /* 128K Work flash */
 _base_SFLASH_USER_DATA              = 0x17000800;
 _size_SFLASH_USER_DATA              = 0x00000800;
 _base_SFLASH_NAR                    = 0x17001A00;
@@ -78,7 +76,7 @@ _size_SFLASH_APP_PROT               = 0x00000200;
 _base_SFLASH_TOC2                   = 0x17007C00;
 _size_SFLASH_TOC2                   = 0x00000200;
 _base_XIP                           = 0x60000000;
-_size_XIP                           = 0x08000000;
+_size_XIP                           = 0x40000000;
 _base_EFUSE                         = 0x90700000;
 _size_EFUSE                         = 0x00100000;
 
